@@ -45,17 +45,12 @@ export default function Home() {
 
   const analyzeSentiment = async () => {
     const result = sentiment.analyze(Mood);
-    console.log(result.positive);
 
     if (result.score > 0) {
-      alert("You're feeling good today! Keep it up!");
       setFeeling(result.positive[0]);
     } else if (result.score < 0) {
-      alert(`You're feeling down today. Remember, it's okay to not be okay.`);
       setFeeling(result.negative[0]);
-      console.log(result);
     } else {
-      alert("You're feeling neutral today. That's alright!");
       setFeeling(result.neutral[0]);
     }
 
@@ -91,43 +86,22 @@ export default function Home() {
   }
 
   const saveMemo = (e: any) => {
-    const savedMemos = localStorage.getItem("memos");
-    console.log("HELLO ARE YOU WORKING!?!??!!?" + savedMemos);
-    if (savedMemos !== null) {
-      console.log("Saved memos found.");
-      setMemos(JSON.parse(savedMemos));
-    } else if (savedMemos === null) {
-      setMemos([]);
-      console.log("No saved memos found.");
-      console.log(Memos);
-    } else {
-      console.log("No saved memos found.");
-    }
-
-    // I need to save the date of the memo as well
     const date = new Date();
     const dateString = date.toDateString();
     e = dateString + ": " + e;
     const newMemos = [...Memos, e];
-    console.log(e);
-    console.log(newMemos);
-    console.log(Memos);
     localStorage.setItem("memos", JSON.stringify(newMemos));
     setMemos(newMemos);
   };
 
   useEffect(() => {
     const savedMemos = localStorage.getItem("memos");
-    console.log("HELLO ARE YOU WORKING!?!??!!?" + savedMemos);
     if (savedMemos !== null) {
-      console.log("Saved memos found.");
       setMemos(JSON.parse(savedMemos));
     } else if (savedMemos === null) {
       setMemos([]);
-      console.log("No saved memos found.");
-      console.log(Memos);
     } else {
-      console.log("No saved memos found.");
+      setMemos([]);
     }
   }, []);
 
@@ -138,9 +112,6 @@ export default function Home() {
       };
       getColors(BackgroundImage, options).then((colors: any) => {
         colorStrings = colors.map((color: { hex: () => any }) => color.hex());
-        console.log(colorStrings);
-        console.log(colorStrings[0]);
-        console.log(colorStrings[2]);
         setFrom(colorStrings[1]);
         setTo(colorStrings[2]);
       });
