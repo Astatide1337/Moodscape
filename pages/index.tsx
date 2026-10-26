@@ -24,6 +24,12 @@ import {
   TableCell,
   getKeyValue,
 } from "@nextui-org/react";
+const natureImages = [
+  "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1080&h=1080&q=80",
+  "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1080&h=1080&q=80",
+  "https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1080&h=1080&q=80",
+];
+
 export default function Home() {
   const [Mood, setMood] = useState<string | null>(null);
   const [Feeling, setFeeling] = useState<{ score: number } | null>(null); // Update the type of Feeling
@@ -31,17 +37,14 @@ export default function Home() {
   const sentiment = new Sentiment();
   const [BackgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [gradient, setGradient] = useState<string>("");
-  const [FROM, setFrom] = useState<string>("");
-  const [TO, setTo] = useState<string>("");
-  const path = require("path");
-  const getColors = require("get-image-colors");
+  const [FROM, setFrom] = useState<string>("#F9DEC9");
+  const [TO, setTo] = useState<string>("#F6C5AF");
   const [Memos, setMemos] = useState<string[]>([]);
   const [TodaysMemo, setTodaysMemo] = useState<string | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [backdrop, setBackdrop] = React.useState("blur");
   const [Analytics, setAnalytics] = useState(false);
   const [CreatedAnalytics, setCreatedAnalytics] = useState<any[][]>([]);
-  let colorStrings;
 
   const analyzeSentiment = async () => {
     const result = sentiment.analyze(Mood);
@@ -54,7 +57,7 @@ export default function Home() {
       setFeeling(result.neutral[0]);
     }
 
-    setBackgroundImage("https://source.unsplash.com/random/1080x1080/?nature");
+    setBackgroundImage(natureImages[Math.floor(Math.random() * natureImages.length)]);
   };
 
   const createAnalytics = () => {
@@ -106,16 +109,28 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (BackgroundImage) {
-      const options = {
-        count: 3,
-      };
-      getColors(BackgroundImage, options).then((colors: any) => {
-        colorStrings = colors.map((color: { hex: () => any }) => color.hex());
-        setFrom(colorStrings[1]);
-        setTo(colorStrings[2]);
-      });
-    }
+    if (!BackgroundImage) return;
+    let active = true;
+
+    const updatePalette = async () => {
+      try {
+        const { extractColors } = await import("extract-colors");
+        const colors = await extractColors(BackgroundImage, {
+          crossOrigin: "anonymous",
+          pixels: 6400,
+        });
+        if (!active) return;
+        setFrom(colors[1]?.hex ?? colors[0]?.hex ?? "#F9DEC9");
+        setTo(colors[2]?.hex ?? colors[1]?.hex ?? colors[0]?.hex ?? "#F6C5AF");
+      } catch {
+        if (!active) return;
+        setFrom("#F9DEC9");
+        setTo("#F6C5AF");
+      }
+    };
+
+    void updatePalette();
+    return () => { active = false; };
   }, [BackgroundImage]);
 
   return (
